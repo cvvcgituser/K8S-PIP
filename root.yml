@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description:
+  This template deploys a VPC,subnets,IGW,routetables for
+  required 3-tier-architecture
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+  
+  
+Resources:
+  NetworkSetup:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cloudformation-stack-cs.s3.amazonaws.com/networking.yml
+      TimeoutInMinutes: 60
+      Parameters:
+         EnvironmentName: !Ref EnvironmentName
+        
+  SecurityGroupSetup:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cloudformation-stack-cs.s3.amazonaws.com/securitygroups.yml
+      TimeoutInMinutes: 60
+      Parameters:
+         VPCID: !GetAtt NetworkSetup.Outputs.vpcid
+         
+  LaunchInstances:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cloudformation-stack-cs.s3.amazonaws.com/instances1.yml
+      TimeoutInMinutes: 60
+      Parameters:
+         GroupId: !GetAtt SecurityGroupSetup.Outputs.SecurityGroupID1
+         WebSubnet1: !GetAtt NetworkSetup.Outputs.subnetid1
+         WebSubnet2: !GetAtt NetworkSetup.Outputs.subnetid2
+
+  LoadBalancer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cloudformation-stack-cs.s3.amazonaws.com/loadbalancer.yml
+      TimeoutInMinutes: 60
+      Parameters:
+         VPCID: !GetAtt NetworkSetup.Outputs.vpcid
+         GroupIdLB: !GetAtt SecurityGroupSetup.Outputs.ALBSecuritygroup
+         WebSubnet1: !GetAtt NetworkSetup.Outputs.subnetid1
+         WebSubnet2: !GetAtt NetworkSetup.Outputs.subnetid2
+         Webserver1: !GetAtt LaunchInstances.Outputs.Webserver1
+         Webserver2: !GetAtt LaunchInstances.Outputs.Webserver2
+
+  DatabaseInstances:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cloudformation-stack-cs.s3.amazonaws.com/database1.yml
+      TimeoutInMinutes: 60
+      Parameters:
+         GroupIdForDBs: !GetAtt SecurityGroupSetup.Outputs.SecurityGroupID1
+         databasesubnet1: !GetAtt NetworkSetup.Outputs.databasesubnet1
+         databasesubnet2: !GetAtt NetworkSetup.Outputs.databasesubnet2
