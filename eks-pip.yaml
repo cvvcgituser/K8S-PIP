@@ -32,6 +32,10 @@ kubectl logs java-deploy-58ddb47c8d-8h8sk
 kubectl get namespaces
 kubectl get svc
 
+# commands to delete services and clusters
+kubectl delete svc service-name
+eksctl delete cluster --name cluster-name
+
 # command to check eksctl version
 eksctl version
 
@@ -40,6 +44,3 @@ aws eks update-cluster-version --region us-east-2 --name EKS-DEPLOY-PIP --kubern
 
 # command to update node-group version
 eksctl upgrade nodegroup --name=IMAGES-PIP --cluster=EKS-DEPLOY-PIP --region=us-east-2 --kubernetes-version=1.24
-
-
-
