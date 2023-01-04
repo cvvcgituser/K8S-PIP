@@ -32,6 +32,15 @@ kubectl logs java-deploy-58ddb47c8d-8h8sk
 kubectl get namespaces
 kubectl get svc
 
+# command to create a name-space
+kubectl create namespace namespace-name
+
+# command to get all resources created by default name space
+kubectl get all -n default 
+
+# command to View the details of the deployed service
+kubectl -n namespace-name describe service service-name
+
 # commands to delete services and clusters
 kubectl delete svc service-name
 eksctl delete cluster --name cluster-name
