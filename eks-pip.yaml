@@ -1,0 +1,32 @@
+# install eksctl /kubectl /awscli
+# configure aws credentials
+
+# command to create cluster
+eksctl create cluster --name EKS-DEPLOY-PIP --version 1.23 --region us-east-2 --nodegroup-name IMAGES-PIP --node-type t2.micro --nodes 5
+
+# update config file,so control plane will be on current cluster 
+aws eks --region us-east-2 update-kubeconfig --name EKS-DEPLOY-PIP
+kubectl cluster-info
+
+# deploy manifest files containing ecr images to run applications in pods
+kubectl apply -f deployment-java.yaml
+kubectl apply -f deployment-python.yaml
+kubectl apply -f deployment-nodejs.yaml
+kubectl apply -f deployment-reactjs.yaml
+
+# check the applications are running on pods with nodes external IP's
+kubectl get pods -A -o wide
+kubectl get nodes -A -o wide
+
+# commands to check namespaces and services created
+kubectl get namespaces
+kubectl get svc
+
+# command to check eksctl version
+eksctl version
+
+# command to update cluster-version
+aws eks update-cluster-version --region us-east-2 --name EKS-DEPLOY-PIP --kubernetes-version 1.24
+
+# command to update node-group version
+eksctl upgrade nodegroup --name=IMAGES-PIP --cluster=EKS-DEPLOY-PIP --region=us-east-2 --kubernetes-version=1.24
